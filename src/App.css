@@ -1,4 +1,4 @@
-.App {
+zx.App {
   text-align: center;
 }
 
@@ -11,7 +11,10 @@
 }
 
 .trackList {
-  width: 200px;
+  border: 1px solid black;
+  width: 300px;
+  height: 700px;
+  overflow: scroll;
 }
 
 /* ----------------------이 곳 위 로---------------------------- */

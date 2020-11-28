@@ -9,19 +9,41 @@ class SearchBox extends Component {
     this.state = {
       currArtist: "",
       trackList: [],
+      // 초기화면에 "가수명을 입력해주세요" 라는 문자열을 출력하기 위해 사용
+      // 그리고 가수의 노래 데이터가 없을 때도 "가수명을 입력해주세요" 라는 문자열을 출력하기 위해 사용
+      errorFlag: false,
     };
-    this.flag = false;
+
+    //
+    this.storage = [];
+
     this.getList = this.getList.bind(this);
     this.getArtistName = this.getArtistName.bind(this);
   }
 
   getList(e) {
-    this.flag = true;
+    this.setState({ errorFlag: true });
     fetch(`http://localhost:4000/musicList/${this.state.currArtist}`)
       .finally(this.setState({ trackList: [] }))
       .then((res) => res.json())
       .then((data) => {
+        this.storage.push({
+          artistName: this.state.currArtist,
+          resultData: data,
+        });
         this.setState({ trackList: data });
+      })
+      .catch((error) => {
+        alert("there is no " + this.state.currArtist);
+        if (this.storage.length === 0) {
+          this.setState({ errorFlag: false });
+        } else {
+          this.setState({
+            trackList: this.storage.resultData[
+              this.storage.resultData.length - 1
+            ],
+          });
+        }
       });
   }
 
@@ -30,26 +52,7 @@ class SearchBox extends Component {
   }
 
   render() {
-    if (!this.flag) {
-      return (
-        <>
-          <header>
-            <div>
-              <input
-                className="searchMusic"
-                type="text"
-                onKeyPress={this.getList}
-                onChange={this.getArtistName}
-                placeholder="Search who you like"
-              />
-              {/* <button onClick={this.getList}>검색</button> */}
-            </div>
-          </header>
-
-          <h1>가수명을 입력하세요</h1>
-        </>
-      );
-    }
+    console.log(this.storage);
     return (
       <>
         <header>
@@ -57,15 +60,15 @@ class SearchBox extends Component {
             <input
               className="searchMusic"
               type="text"
-              onKeyPress={this.getList}
+              // onKeyPress={this.getList}
               onChange={this.getArtistName}
               placeholder="Search who you like"
             />
-            {/* <button onKeyPress={this.getList}>검색</button> */}
+            <button onClick={this.getList}>검색</button>
           </div>
         </header>
-        <span className="trackList">
-          <ul>
+        {this.state.errorFlag ? (
+          <ul className="trackList">
             {this.state.trackList.length !== 0 ? (
               this.state.trackList.map((value, index) => (
                 <TrackList key={index} trackId={value.track.track_id}>
@@ -79,7 +82,9 @@ class SearchBox extends Component {
               />
             )}
           </ul>
-        </span>
+        ) : (
+          <h1>가수명을 입력하세요</h1>
+        )}
       </>
     );
   }
